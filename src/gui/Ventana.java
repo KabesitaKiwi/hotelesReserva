@@ -1,6 +1,8 @@
 package gui;
 
 import java.awt.*;
+import java.time.LocalTime;
+
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 
@@ -36,6 +38,7 @@ public class Ventana extends JFrame {
     private JCheckBox chekDesayuno;
     private JCheckBox chekParking;
     private JCheckBox chekSpa;
+    private JSpinner campoHorario;
     //tercer panel de habitaciones y opciones (descuento y notas)
     private JLabel descuento;
     private JSlider sliderDescuento;
@@ -171,8 +174,21 @@ public class Ventana extends JFrame {
         chekParking = new JCheckBox("Parking");
         chekParking.setBounds(15, 140, 200, 20);
         chekSpa = new JCheckBox("SPA");
-        chekSpa.setBounds(15, 160, 200, 20);
+        chekSpa.setBounds(15, 160, 125, 20);
 
+        campoHorario = new JSpinner();
+        
+        panelHabitaciones.add(new JLabel("Hora Spa:")).setBounds(30, 215, 120, 25);
+        campoHorario= new JSpinner(new SpinnerDateModel());
+        JSpinner.DateEditor editorHora = new JSpinner.DateEditor(campoHorario, "HH:mm");
+        campoHorario.setEditor(editorHora);
+        JLabel horario = new JLabel("Horario SPA");
+        horario.setBounds(160, 140,120,25);
+        campoHorario.setBounds(150, 160, 120 , 25);
+        
+        
+        panelExtras.add(horario);
+        panelExtras.add(campoHorario);
         panelExtras.add(tituloServicios);
         panelExtras.add(scrollServicios);
         panelExtras.add(chekDesayuno);
