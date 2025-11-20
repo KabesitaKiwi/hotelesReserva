@@ -1,54 +1,55 @@
 package gui;
 
 import java.awt.*;
-import java.time.LocalTime;
+import java.awt.event.ActionEvent;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 
 public class Ventana extends JFrame {
 
-    private JLabel titulo;
-    private JLabel logo;
+    public JLabel titulo;
+    public JLabel logo;
     //lo que usare para el panel de datos cliente
-    private JLabel nombre;
-    private JLabel DNI;
-    private JLabel telefono;
-    private JLabel fechaEntrada;
-    private JLabel fechaSalida;
-    private JLabel imagenCliente;
-    private JTextField campoNombre;
-    private JTextField campoDNI;
-    private JTextField campoTelefono;
-    private JTextField campoFechaEntrada;
-    private JTextField campoFechaSalida;
+    public JLabel nombre;
+    public JLabel DNI;
+    public JLabel telefono;
+    public JLabel fechaEntrada;
+    public JLabel fechaSalida;
+    public JLabel imagenCliente;
+    public JTextField campoNombre;
+    public JTextField campoDNI;
+    public JTextField campoTelefono;
+    public JTextField campoFechaEntrada;
+    public JTextField campoFechaSalida;
     //lo que usare para el panel de Habitaciones/opciones
     //primer panel de Habitaciones
-    private JLabel tipoHabitacion;
-    private JComboBox comboHabitacion;
-    private JLabel regimen;
-    private ButtonGroup grupoRegimen;
-    private JRadioButton alojamiento;
-    private JRadioButton mediaPen;
-    private JRadioButton pensionEntera;
-    private JLabel precioNocheCambiante;
+    public JLabel tipoHabitacion;
+    public JComboBox comboHabitacion;
+    public JLabel regimen;
+    public ButtonGroup grupoRegimen;
+    public JRadioButton alojamiento;
+    public JRadioButton mediaPen;
+    public JRadioButton pensionEntera;
+    public JLabel precioNocheCambiante;
     //segundo panel de habitaciones y opciones (Extras y servicios)
-    private JLabel tituloServicios;
-    private JList listaServicios;
-    private JCheckBox chekDesayuno;
-    private JCheckBox chekParking;
-    private JCheckBox chekSpa;
-    private JSpinner campoHorario;
+    public JLabel tituloServicios;
+    public JList listaServicios;
+    public JCheckBox chekDesayuno;
+    public JCheckBox chekParking;
+    public JCheckBox chekSpa;
+    public JSpinner campoHorario;
     //tercer panel de habitaciones y opciones (descuento y notas)
-    private JLabel descuento;
-    private JSlider sliderDescuento;
-    private JTextArea areaNotas;
-    private JLabel notasRecepcionista;
+    public JLabel descuento;
+    public JSlider sliderDescuento;
+    public JTextArea areaNotas;
+    public JLabel notasRecepcionista;
 	//ultimo Panel de la tabla reservas
-	private JTable tablaReserva;
-	private JButton botonNuevaReserva;
-	private JButton botonGuardarReserva;
-	private JButton botonCancelarReserva;
+	public JTable tablaReserva;
+	public JButton botonNuevaReserva;
+	public JButton botonGuardarReserva;
+	public JButton botonCancelarReserva;
+	public Object frame;
 
     public Ventana() {
         super("Reservica de hoteles");
@@ -136,6 +137,9 @@ public class Ventana extends JFrame {
         grupoRegimen.add(alojamiento);
         grupoRegimen.add(mediaPen);
         grupoRegimen.add(pensionEntera);
+        
+        alojamiento.setSelected(true);
+        
 
         precioNocheCambiante = new JLabel("Precio por noche: - €");
         precioNocheCambiante.setBounds(15, 165, 200, 20);
@@ -178,7 +182,6 @@ public class Ventana extends JFrame {
 
         campoHorario = new JSpinner();
         
-        panelHabitaciones.add(new JLabel("Hora Spa:")).setBounds(30, 215, 120, 25);
         campoHorario= new JSpinner(new SpinnerDateModel());
         JSpinner.DateEditor editorHora = new JSpinner.DateEditor(campoHorario, "HH:mm");
         campoHorario.setEditor(editorHora);
@@ -202,13 +205,15 @@ public class Ventana extends JFrame {
 		panelDescuento.setBorder(new TitledBorder("Descuento y Notas"));
 		panelHabitaciones.add(panelDescuento);
 
-		descuento = new JLabel("Descuento (%)");
+		descuento = new JLabel("Descuento (%)  --");
 		descuento.setBounds(15, 20, 200, 20);
 		
 		sliderDescuento = new JSlider(0, 30, 0);
 		sliderDescuento.setMajorTickSpacing(10);
+		sliderDescuento.setMinorTickSpacing(10);
 		sliderDescuento.setPaintTicks(true);
 		sliderDescuento.setPaintLabels(true);
+		sliderDescuento.setSnapToTicks(true);
 		sliderDescuento.setBounds(15, 45, 200, 50);
 
 
@@ -256,8 +261,6 @@ public class Ventana extends JFrame {
 		botonCancelarReserva.setBounds(580, 165, 150, 30); // último
 
 		panelTabla.add(scrollTabla);
-		panelTabla.add(scrollTabla);
-		panelTabla.add(scrollTabla);
 		panelTabla.add(botonNuevaReserva);
 		panelTabla.add(botonGuardarReserva);
 		panelTabla.add(botonCancelarReserva);
@@ -269,10 +272,25 @@ public class Ventana extends JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);   // Hacer que cerrar la ventana termine la aplicación
         this.setSize(1000, 700);                                // Tamaño de la ventana principal: ancho=600, alto=700
         this.setLocationRelativeTo(null);                      // Centrar la ventana en la pantalla
-    }
+        
+        //action command
+        botonNuevaReserva.setActionCommand("NuevaReserva");
+        botonGuardarReserva.setActionCommand("GuardarReserva");
+        botonCancelarReserva.setActionCommand("CancelarReserva");
 
-    public static void main(String[] args) {
-        Ventana frame = new Ventana();
-        frame.setVisible(true);
+        comboHabitacion.setActionCommand("HabitacionElegida");
+
+        alojamiento.setActionCommand("Alojamiento");
+        
+        mediaPen.setActionCommand("MediaPension");
+        pensionEntera.setActionCommand("PensionCompleta");
+
+        chekDesayuno.setActionCommand("CheckServicios");
+        chekParking.setActionCommand("CheckServicios");
+        chekSpa.setActionCommand("CheckServicios");
+             
+        listaServicios.setEnabled(false);
+
     }
+    
 }
