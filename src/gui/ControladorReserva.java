@@ -27,6 +27,7 @@ public class ControladorReserva implements ActionListener, ListSelectionListener
     private double descuento = 0;
     private double precioFinal = 0;
     private DefaultTableModel tablaModel;
+    private int filaSeleccionada = -1;
 
     public ControladorReserva(Ventana vista, ModeloReservas modelo) {
         this.vista = vista;
@@ -40,6 +41,7 @@ public class ControladorReserva implements ActionListener, ListSelectionListener
 
         addActionListener(this);
         addListSelectionListener(this);
+        vista.listaServicios.addListSelectionListener(this);
     }
 
     private void addActionListener(ActionListener listener) {
@@ -56,6 +58,9 @@ public class ControladorReserva implements ActionListener, ListSelectionListener
         vista.chekDesayuno.addActionListener(listener);
         vista.chekParking.addActionListener(listener);
         vista.chekSpa.addActionListener(listener);
+        
+        vista.tablaReserva.getSelectionModel().addListSelectionListener(this);
+        
 
         vista.campoHorario.addChangeListener(e -> listener.actionPerformed(
                 new ActionEvent(vista.campoHorario, ActionEvent.ACTION_PERFORMED, "horario")
@@ -87,10 +92,6 @@ public class ControladorReserva implements ActionListener, ListSelectionListener
         switch (actionCommand) {
 
             case "NuevaReserva":
-                limpiarCampos();
-                break;
-
-            case "GuardarReserva":
             	if (hayCamposVacios()) {
                     JOptionPane.showMessageDialog(null,
                             "Debes rellenar todos los campos antes de guardar.",
@@ -101,25 +102,25 @@ public class ControladorReserva implements ActionListener, ListSelectionListener
             	
 
             	
-            	if (!utilidades.dniValido(vista.campoDNI.getText())) {
+            	if (!utilidades.dniValido(vista.campoDNI.getText().trim())) {
             	    JOptionPane.showMessageDialog(null, "DNI incorrecto (Ej: 12345678A)");
             	    break;
             	}
 
-            	if (!utilidades.telefonoValido(vista.campoTelefono.getText())) {
+            	if (!utilidades.telefonoValido(vista.campoTelefono.getText().trim())) {
             	    JOptionPane.showMessageDialog(null, "Teléfono incorrecto (9 dígitos)");
             	    break;
             	}
 
-            	if (!utilidades.fechaValida(vista.campoFechaEntrada.getText()) ||
-            	    !utilidades.fechaValida(vista.campoFechaSalida.getText())) {
+            	if (!utilidades.fechaValida(vista.campoFechaEntrada.getText().trim()) ||
+            	    !utilidades.fechaValida(vista.campoFechaSalida.getText().trim())) {
             	    JOptionPane.showMessageDialog(null, "La fecha debe tener formato dd/MM/yyyy");
             	    break;
             	}
             	
             	int dias = calcularDias(
-                        vista.campoFechaEntrada.getText(),
-                        vista.campoFechaSalida.getText()
+                        vista.campoFechaEntrada.getText().trim(),
+                        vista.campoFechaSalida.getText().trim()
                 );
             	
                 if (dias <= 0) dias = 1;
@@ -131,11 +132,11 @@ public class ControladorReserva implements ActionListener, ListSelectionListener
                 double precioTotal = precioPorNoche * dias;
             	
             	modelo.altaReservas(
-                        vista.campoNombre.getText(),
-                        vista.campoDNI.getText(),
-                        vista.campoTelefono.getText(),
-                        vista.campoFechaEntrada.getText(),
-                        vista.campoFechaSalida.getText(),
+                        vista.campoNombre.getText().trim(),
+                        vista.campoDNI.getText().trim(),
+                        vista.campoTelefono.getText().trim(),
+                        vista.campoFechaEntrada.getText().trim(),
+                        vista.campoFechaSalida.getText().trim(),
                         vista.comboHabitacion.getSelectedItem().toString(),
                         obtenerRegimenSeleccionado(),
                         precioBaseHabitacion,
@@ -149,11 +150,85 @@ public class ControladorReserva implements ActionListener, ListSelectionListener
             	
             	 refrescarTabla();
             	 JOptionPane.showMessageDialog(null, "Reserva guardada correctamente.");
+            	 limpiarCampos();
             	 break;
 
-            case "CancelarReserva":
-                limpiarCampos();
+            case "GuardarReserva":
+                
+                if (hayCamposVacios()) {
+                    JOptionPane.showMessageDialog(null,
+                            "Debes rellenar todos los campos antes de guardar.",
+                            "Campos incompletos",
+                            JOptionPane.WARNING_MESSAGE);
+                    break;
+                }
+                
+                if (!utilidades.dniValido(vista.campoDNI.getText().trim())) {
+            	    JOptionPane.showMessageDialog(null, "DNI incorrecto (Ej: 12345678A)");
+            	    break;
+            	}
+
+            	if (!utilidades.telefonoValido(vista.campoTelefono.getText().trim())) {
+            	    JOptionPane.showMessageDialog(null, "Teléfono incorrecto (9 dígitos)");
+            	    break;
+            	}
+
+            	if (!utilidades.fechaValida(vista.campoFechaEntrada.getText().trim()) ||
+            	    !utilidades.fechaValida(vista.campoFechaSalida.getText().trim())) {
+            	    JOptionPane.showMessageDialog(null, "La fecha debe tener formato dd/MM/yyyy");
+            	    break;
+            	}
+
+                if (filaSeleccionada < 0) {
+                    JOptionPane.showMessageDialog(null, "Selecciona una reserva para actualizar.");
+                    break;
+                }
+
+                Reservas rerserva = modelo.obtenerReservas().get(filaSeleccionada);
+
+                rerserva.setNombre(vista.campoNombre.getText());
+                rerserva.setDni(vista.campoDNI.getText());
+                rerserva.setTelefono(vista.campoTelefono.getText());
+                rerserva.setFechaEntrada(vista.campoFechaEntrada.getText());
+                rerserva.setFechaSalida(vista.campoFechaSalida.getText());
+                rerserva.setTipoHabitacion(vista.comboHabitacion.getSelectedItem().toString());
+                rerserva.setRegimen(obtenerRegimenSeleccionado());
+                rerserva.setDesayuno(vista.chekDesayuno.isSelected());
+                rerserva.setParking(vista.chekParking.isSelected());
+                rerserva.setSpa(vista.chekSpa.isSelected());
+                rerserva.setExtrasSuite(vista.listaServicios.getSelectedValuesList());
+                rerserva.setDescuento(vista.sliderDescuento.getValue());
+
+                
+                int diasActualizar = calcularDias(rerserva.getFechaEntrada().trim(), rerserva.getFechaSalida().trim());
+                if (diasActualizar <= 0) diasActualizar = 1;
+
+                double precioNoche = calcularPrecioPorNoche();
+                rerserva.setImporteFinal(precioNoche * diasActualizar);
+
+                refrescarTabla();
+                JOptionPane.showMessageDialog(null, "Reserva actualizada correctamente.");
                 break;
+                
+            case "CancelarReserva":
+            	 int fila = vista.tablaReserva.getSelectedRow();
+
+            	    if (fila == -1) {
+            	        JOptionPane.showMessageDialog(null, "Selecciona una reserva para cancelar.");
+            	        break;
+            	    }
+
+            	    String dniSeleccionado = tablaModel.getValueAt(fila, 1).toString();
+
+            	    if (modelo.borrarReservaPorDni(dniSeleccionado)) {
+            	        JOptionPane.showMessageDialog(null, "Reserva eliminada correctamente.");
+            	    } else {
+            	        JOptionPane.showMessageDialog(null, "Error al eliminar la reserva.");
+            	    }
+
+            	    refrescarTabla();
+            	    limpiarCampos();
+            	    break;
 
             case "HabitacionElegida":
             	String hab = vista.comboHabitacion.getSelectedItem().toString();
@@ -264,6 +339,43 @@ public class ControladorReserva implements ActionListener, ListSelectionListener
     @Override
     public void valueChanged(ListSelectionEvent e) {
         // TODO Auto-generated method stub
+    	if (!e.getValueIsAdjusting()) {
+
+            filaSeleccionada = vista.tablaReserva.getSelectedRow();
+
+            if (filaSeleccionada < 0) return;
+
+            // Cargar la reserva seleccionada
+            Reservas r = modelo.obtenerReservas().get(filaSeleccionada);
+
+            vista.campoNombre.setText(r.getNombre());
+            vista.campoDNI.setText(r.getDni());
+            vista.campoTelefono.setText(r.getTelefono());
+            vista.campoFechaEntrada.setText(r.getFechaEntrada().trim());
+            vista.campoFechaSalida.setText(r.getFechaSalida().trim());
+
+            vista.comboHabitacion.setSelectedItem(r.getTipoHabitacion());
+
+            // Seleccionar régimen
+            switch (r.getRegimen()) {
+                case "Alojamiento": vista.alojamiento.setSelected(true); break;
+                case "Media Pensión": vista.mediaPen.setSelected(true); break;
+                case "Pensión Completa": vista.pensionEntera.setSelected(true); break;
+            }
+
+            // Servicios Suite
+            vista.listaServicios.clearSelection();
+            for (String s : r.getExtrasSuite()) {
+                vista.listaServicios.setSelectedValue(s, true);
+            }
+
+            // Extras
+            vista.chekDesayuno.setSelected(r.isDesayuno());
+            vista.chekParking.setSelected(r.isParking());
+            vista.chekSpa.setSelected(r.isSpa());
+
+            vista.sliderDescuento.setValue(r.getDescuento());
+        }
     }
 
     private void actualizarPrecioFinal() {
@@ -299,7 +411,7 @@ public class ControladorReserva implements ActionListener, ListSelectionListener
         vista.chekParking.setSelected(false);
         vista.chekSpa.setSelected(false);
 
-        vista.campoHorario.setValue(0);
+        vista.campoHorario.setValue(new java.util.Date());
 
         vista.sliderDescuento.setValue(0);
         vista.descuento.setText("Descuento (%) --");
