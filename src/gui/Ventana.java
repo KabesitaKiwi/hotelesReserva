@@ -163,10 +163,9 @@ public class Ventana extends JFrame {
         tituloServicios.setBounds(15, 20, 200, 20);
         listaServicios = new JList(
                 new String[]{
-                    "Decoración romántica",
-                    "Pack Aniversario",
-                    "Botella de vino",
-                    "Bombones"
+                    "Jacuzzi",
+                    "Cama King",
+                    "Sala VIP"
                 }
         );
         listaServicios.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
